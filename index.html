@@ -19,6 +19,7 @@
     cursor: pointer;
     animation: pulse 1.5s infinite alternate;
     text-align: center;
+    z-index: 10;
   }
   #egg span {
     display: block;
@@ -30,14 +31,17 @@
     from { transform: translate(-50%, -50%) scale(1); }
     to { transform: translate(-50%, -50%) scale(1.1); }
   }
-  canvas {
-    display: block;
+  #scene-container {
+    display: none;
+    width: 100%;
+    height: 100vh;
   }
 </style>
 </head>
 <body>
 <div id="egg">🥚<span>Tócalo</span></div>
-<audio id="music" src="canciones.mp3.mp3"></audio>
+<div id="scene-container"></div>
+<audio id="music" src="canciones.mp3"></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
@@ -45,8 +49,8 @@
 <script>
   const egg = document.getElementById('egg');
   const music = document.getElementById('music');
+  const container = document.getElementById('scene-container');
 
-  // Crear la escena Three.js pero oculta hasta que toque el huevo
   let scene, camera, renderer, cat, sunflower;
 
   function initScene() {
@@ -54,17 +58,16 @@
     camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
     renderer = new THREE.WebGLRenderer({antialias: true});
     renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+    container.appendChild(renderer.domElement);
 
     // Luces
     const light = new THREE.DirectionalLight(0xffffff, 1);
     light.position.set(5, 5, 5).normalize();
     scene.add(light);
 
-    // Gatito kawaii (simplificado con esferas y cilindros)
+    // Materiales
     const materialGray = new THREE.MeshPhongMaterial({color: 0xaaaaaa});
     const materialWhite = new THREE.MeshPhongMaterial({color: 0xffffff});
-    const materialPink = new THREE.MeshPhongMaterial({color: 0xff99aa});
     const materialYellow = new THREE.MeshPhongMaterial({color: 0xffdd00});
     const materialBrown = new THREE.MeshPhongMaterial({color: 0x8b4513});
 
@@ -88,7 +91,7 @@
     ear2.position.set(0.4, 1.7, 0);
     cat.add(ear2);
 
-    // Ojos (cerrados por defecto)
+    // Ojos (blancos simples)
     const eyeGeom = new THREE.SphereGeometry(0.1, 16, 16);
     const eye1 = new THREE.Mesh(eyeGeom, materialWhite);
     eye1.position.set(-0.25, 1.3, 0.65);
@@ -109,7 +112,7 @@
     arm2.rotation.z = -Math.PI/4;
     cat.add(arm2);
 
-    // Girasol (oculto)
+    // Girasol
     const flower = new THREE.Group();
     const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1, 16), materialBrown);
     stem.position.y = -0.5;
@@ -136,13 +139,21 @@
   }
 
   egg.addEventListener('click', () => {
-    egg.style.display = 'none';
-    initScene();
-    music.play();
+    // Animación de desaparecer huevo
+    egg.style.transition = "transform 1s, opacity 1s";
+    egg.style.transform = "scale(0)";
+    egg.style.opacity = "0";
 
-    // Animaciones con GSAP
-    gsap.to(sunflower.scale, {x:1,y:1,z:1, duration:2, ease:"elastic.out(1,0.3)", delay:1});
-    gsap.to(cat.rotation, {y:0.3, duration:2, yoyo:true, repeat:-1});
+    setTimeout(() => {
+      egg.style.display = "none";
+      container.style.display = "block";
+      initScene();
+      music.play();
+
+      // Animaciones
+      gsap.to(sunflower.scale, {x:1,y:1,z:1, duration:2, ease:"elastic.out(1,0.3)", delay:1});
+      gsap.to(cat.rotation, {y:0.3, duration:2, yoyo:true, repeat:-1});
+    }, 1000);
   });
 </script>
 </body>
