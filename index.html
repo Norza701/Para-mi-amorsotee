@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Sorpresa para mi Bigotona</title>
+<style>
+  body {
+    background: #ffe6f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    font-family: 'Comic Sans MS', cursive;
+    overflow: hidden;
+    transition: background 2s;
+  }
+
+  /* Fondo animado que se activa */
+  body.romantic {
+    background: linear-gradient(270deg, #ff99cc, #ffb347, #ff6699, #ffcc70);
+    background-size: 800% 800%;
+    animation: fondoAnimado 10s ease infinite;
+  }
+
+  @keyframes fondoAnimado {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  h1 {
+    display: none;
+    color: #e60073;
+    text-shadow: 2px 2px #fff;
+    font-size: 2em;
+    margin-bottom: 20px;
+    text-align: center;
+    animation: aparecerTexto 2s ease forwards;
+  }
+
+  @keyframes aparecerTexto {
+    from { opacity: 0; transform: scale(0.5); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  /* Huevo inicial */
+  #egg {
+    width: 120px;
+    height: 160px;
+    background: white;
+    border-radius: 50% 50% 45% 45%;
+    border: 3px solid #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: bold;
+    color: #666;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+    animation: bounce 1s infinite alternate;
+  }
+
+  @keyframes bounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-15px); }
+  }
+
+  /* Gatito */
+  #cat {
+    display: none;
+    position: relative;
+    width: 200px;
+    height: 220px;
+  }
+
+  .body {
+    width: 140px;
+    height: 160px;
+    background: gray;
+    border-radius: 70px;
+    position: absolute;
+    bottom: 0;
+    left: 30px;
+  }
+
+  .stripe {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 160px;
+    background: white;
+    border-radius: 10px;
+  }
+
+  .head {
+    width: 120px;
+    height: 120px;
+    background: gray;
+    border-radius: 50%;
+    position: absolute;
+    top: -60px;
+    left: 40px;
+  }
+
+  .ear {
+    width: 40px;
+    height: 40px;
+    background: gray;
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    position: absolute;
+  }
+
+  .ear.left { top: -20px; left: 20px; }
+  .ear.right { top: -20px; right: 20px; }
+
+  .eye {
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 40px;
+  }
+
+  .eye.left { left: 25px; }
+  .eye.right { right: 25px; }
+
+  .eye::after {
+    content: "";
+    width: 10px;
+    height: 10px;
+    background: black;
+    border-radius: 50%;
+    position: absolute;
+    top: 5px;
+    left: 5px;
+  }
+
+  .arms {
+    position: absolute;
+    top: 80px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .arm {
+    width: 40px;
+    height: 80px;
+    background: gray;
+    border-radius: 20px;
+    transform-origin: top center;
+    animation: wave 1s infinite alternate;
+  }
+
+  .arm.left { transform: rotate(20deg); }
+  .arm.right { transform: rotate(-20deg); }
+
+  @keyframes wave {
+    from { transform: rotate(20deg); }
+    to { transform: rotate(-20deg); }
+  }
+
+  /* Ramo de flores */
+  .flowers {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 100px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .flower {
+    width: 25px;
+    height: 25px;
+    background: yellow;
+    border-radius: 50%;
+    position: relative;
+  }
+
+  .flower::after {
+    content: "";
+    width: 10px;
+    height: 10px;
+    background: orange;
+    border-radius: 50%;
+    position: absolute;
+    top: 7px;
+    left: 7px;
+  }
+
+  /* Corazones flotando */
+  .heart {
+    position: absolute;
+    font-size: 2rem;
+    color: #ff3366;
+    animation: floatUp 4s linear infinite;
+    opacity: 0.8;
+  }
+
+  @keyframes floatUp {
+    0% {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-200px) scale(1.5);
+      opacity: 0;
+    }
+  }
+</style>
+</head>
+<body>
+  <h1>💖 Te amo corazón 💖<br>De parte de: tu cagadin XD</h1>
+  <div id="egg">Tocar</div>
+  <div id="cat">
+    <div class="head">
+      <div class="ear left"></div>
+      <div class="ear right"></div>
+      <div class="eye left"></div>
+      <div class="eye right"></div>
+    </div>
+    <div class="body">
+      <div class="stripe"></div>
+    </div>
+    <div class="arms">
+      <div class="arm left"></div>
+      <div class="arm right"></div>
+    </div>
+    <div class="flowers">
+      <div class="flower"></div>
+      <div class="flower"></div>
+      <div class="flower"></div>
+      <div class="flower"></div>
+      <div class="flower"></div>
+      <div class="flower"></div>
+    </div>
+  </div>
+
+  <!-- Música en bucle -->
+  <audio id="musica" src="canciones.mp3" loop></audio>
+
+<script>
+  const egg = document.getElementById("egg");
+  const cat = document.getElementById("cat");
+  const title = document.querySelector("h1");
+  const musica = document.getElementById("musica");
+
+  egg.addEventListener("click", () => {
+    egg.style.display = "none";
+    cat.style.display = "block";
+    title.style.display = "block";
+    document.body.classList.add("romantic"); // cambia el fondo
+    lanzarCorazones();
+    musica.play(); // empieza la canción automáticamente
+  });
+
+  function lanzarCorazones() {
+    setInterval(() => {
+      const heart = document.createElement("div");
+      heart.classList.add("heart");
+      heart.innerHTML = "❤️";
+      heart.style.left = Math.random() * window.innerWidth + "px";
+      heart.style.bottom = "0px";
+      document.body.appendChild(heart);
+
+      setTimeout(() => {
+        heart.remove();
+      }, 4000);
+    }, 600);
+  }
+</script>
+</body>
+</html>
