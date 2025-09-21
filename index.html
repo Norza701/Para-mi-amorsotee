@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Sorpresa 3D para mi Bigotona</title>
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+    font-family: 'Comic Sans MS', cursive;
+    background: #ffe6f0;
+  }
+  #egg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 150px;
+    cursor: pointer;
+    animation: pulse 1.5s infinite alternate;
+    text-align: center;
+  }
+  #egg span {
+    display: block;
+    font-size: 24px;
+    color: #333;
+    margin-top: -20px;
+  }
+  @keyframes pulse {
+    from { transform: translate(-50%, -50%) scale(1); }
+    to { transform: translate(-50%, -50%) scale(1.1); }
+  }
+  canvas {
+    display: block;
+  }
+</style>
+</head>
+<body>
+<div id="egg">🥚<span>Tócalo</span></div>
+<audio id="music" src="canciones.mp3"></audio>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
+
+<script>
+  const egg = document.getElementById('egg');
+  const music = document.getElementById('music');
+
+  // Crear la escena Three.js pero oculta hasta que toque el huevo
+  let scene, camera, renderer, cat, sunflower;
+
+  function initScene() {
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    renderer = new THREE.WebGLRenderer({antialias: true});
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Luces
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(5, 5, 5).normalize();
+    scene.add(light);
+
+    // Gatito kawaii (simplificado con esferas y cilindros)
+    const materialGray = new THREE.MeshPhongMaterial({color: 0xaaaaaa});
+    const materialWhite = new THREE.MeshPhongMaterial({color: 0xffffff});
+    const materialPink = new THREE.MeshPhongMaterial({color: 0xff99aa});
+    const materialYellow = new THREE.MeshPhongMaterial({color: 0xffdd00});
+    const materialBrown = new THREE.MeshPhongMaterial({color: 0x8b4513});
+
+    cat = new THREE.Group();
+
+    // Cuerpo
+    const body = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 32), materialGray);
+    body.scale.set(1, 0.8, 1);
+    cat.add(body);
+
+    // Cabeza
+    const head = new THREE.Mesh(new THREE.SphereGeometry(0.7, 32, 32), materialGray);
+    head.position.y = 1.2;
+    cat.add(head);
+
+    // Orejas
+    const ear1 = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.5, 32), materialGray);
+    ear1.position.set(-0.4, 1.7, 0);
+    cat.add(ear1);
+    const ear2 = ear1.clone();
+    ear2.position.set(0.4, 1.7, 0);
+    cat.add(ear2);
+
+    // Ojos (cerrados por defecto)
+    const eyeGeom = new THREE.SphereGeometry(0.1, 16, 16);
+    const eye1 = new THREE.Mesh(eyeGeom, materialWhite);
+    eye1.position.set(-0.25, 1.3, 0.65);
+    const eye2 = eye1.clone();
+    eye2.position.x = 0.25;
+    head.add(eye1);
+    head.add(eye2);
+
+    // Brazos
+    const armGeom = new THREE.CylinderGeometry(0.15, 0.15, 0.8, 32);
+    const arm1 = new THREE.Mesh(armGeom, materialGray);
+    arm1.position.set(-0.8, 0.5, 0);
+    arm1.rotation.z = Math.PI/4;
+    cat.add(arm1);
+
+    const arm2 = new THREE.Mesh(armGeom, materialGray);
+    arm2.position.set(0.8, 0.5, 0);
+    arm2.rotation.z = -Math.PI/4;
+    cat.add(arm2);
+
+    // Girasol (oculto)
+    const flower = new THREE.Group();
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1, 16), materialBrown);
+    stem.position.y = -0.5;
+    flower.add(stem);
+    const petal = new THREE.Mesh(new THREE.CircleGeometry(0.4, 32), materialYellow);
+    petal.position.y = 0.5;
+    petal.rotation.x = -Math.PI/2;
+    flower.add(petal);
+
+    flower.position.set(0.8, 0.5, 0);
+    flower.scale.set(0.01,0.01,0.01); // escondido
+    sunflower = flower;
+    cat.add(flower);
+
+    scene.add(cat);
+    camera.position.z = 5;
+
+    animate();
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+    renderer.render(scene, camera);
+  }
+
+  egg.addEventListener('click', () => {
+    egg.style.display = 'none';
+    initScene();
+    music.play();
+
+    // Animaciones con GSAP
+    gsap.to(sunflower.scale, {x:1,y:1,z:1, duration:2, ease:"elastic.out(1,0.3)", delay:1});
+    gsap.to(cat.rotation, {y:0.3, duration:2, yoyo:true, repeat:-1});
+  });
+</script>
+</body>
+</html>
