@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>Gatito 3D - Sorpresa</title>
+<style>
+  html,body { height:100%; margin:0; font-family:Arial, sans-serif; background:#ffe6f0; }
+  #container { width:100%; height:100%; overflow:hidden; position:relative; }
+  #ui {
+    position:absolute; left:0; right:0; top:12px; text-align:center; pointer-events:none;
+  }
+  #message { pointer-events:auto; display:none; margin:0 auto; color:#e60073; text-shadow:1px 1px #fff; font-size:24px; }
+  #egg {
+    pointer-events:auto;
+    display:inline-block;
+    margin-top:10px;
+    cursor:pointer;
+    background:rgba(255,255,255,0.9);
+    border-radius:16px;
+    padding:14px 18px;
+    box-shadow:0 6px 14px rgba(0,0,0,0.25);
+    font-size:22px;
+  }
+  #credits { position:absolute; left:12px; bottom:12px; color:#333; font-size:13px; }
+</style>
+</head>
+<body>
+<div id="container"></div>
+<div id="ui">
+  <div id="message">💖 Te amo corazón 💖<br>De parte de: tu cagadin XD</div>
+  <div id="egg">🥚 Tocar</div>
+</div>
+<div id="credits">Toca el huevo para ver la sorpresa 🎶</div>
+
+<script src="https://unpkg.com/three@0.152.2/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+<script>
+const container = document.getElementById('container');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xffe6f0);
+
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);
+camera.position.set(0, 1.4, 4);
+
+const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+container.appendChild(renderer.domElement);
+
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enablePan = false;
+controls.enableZoom = false;
+controls.maxPolarAngle = Math.PI/2 + 0.6;
+controls.minPolarAngle = Math.PI/4;
+controls.enabled = false;
+
+const hemi = new THREE.HemisphereLight(0xffffff, 0x8888aa, 0.9);
+scene.add(hemi);
+const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+dir.position.set(3,5,2);
+scene.add(dir);
+
+const matBody = new THREE.MeshStandardMaterial({color:0x9e9e9e, roughness:0.6, metalness:0.1});
+const matInnerEar = new THREE.MeshStandardMaterial({color:0xf6c6d9});
+const matDark = new THREE.MeshStandardMaterial({color:0x222222});
+const matCheek = new THREE.MeshStandardMaterial({color:0xffb6c1, transparent:true, opacity:0.9});
+const matStem = new THREE.MeshStandardMaterial({color:0x2e7d32});
+const matPetal = new THREE.MeshStandardMaterial({color:0xffdd33});
+const matCenter = new THREE.MeshStandardMaterial({color:0x5d3a00});
+
+const cat = new THREE.Group();
+scene.add(cat);
+
+const bodyGeom = new THREE.SphereGeometry(1.0, 32, 32);
+const body = new THREE.Mesh(bodyGeom, matBody);
+body.scale.set(1.0,1.1,0.85);
+body.position.set(0, -0.3, 0);
+cat.add(body);
+
+const headGeom = new THREE.SphereGeometry(0.78, 32, 32);
+const head = new THREE.Mesh(headGeom, matBody);
+head.position.set(0, 0.8, 0);
+cat.add(head);
+
+function makeEar(x){
+  const earGeom = new THREE.ConeGeometry(0.22, 0.4, 32);
+  const ear = new THREE.Mesh(earGeom, matBody);
+  ear.position.set(x, 1.25, 0);
+  ear.rotation.set(Math.PI/2.2, 0, x>0?-0.35:0.35);
+  cat.add(ear);
+  const inner = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.25, 32), matInnerEar);
+  inner.position.set(x, 1.23, 0.06);
+  inner.rotation.copy(ear.rotation);
+  cat.add(inner);
+}
+makeEar(-0.45);
+makeEar(0.45);
+
+function makeEye(x){
+  const size = 128;
+  const canvas = document.createElement('canvas');
+  canvas.width = size; canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = 'transparent';
+  ctx.fillRect(0,0,size,size);
+  ctx.font = '96px serif';
+  ctx.textAlign = 'center'; ctx.textBaseline='middle';
+  ctx.fillStyle = '#ff3366'; ctx.fillText('❤', size/2, size/2+8);
+  const tex = new THREE.CanvasTexture(canvas);
+  const spriteMat = new THREE.SpriteMaterial({map:tex, transparent:true});
+  const sprite = new THREE.Sprite(spriteMat);
+  sprite.scale.set(0.4,0.4,1);
+  sprite.position.set(x, 0.9, 0.55);
+  cat.add(sprite);
+  return {sprite, canvas, ctx, tex};
+}
+const leftEye = makeEye(-0.28);
+const rightEye = makeEye(0.28);
+
+const cheekGeom = new THREE.CircleGeometry(0.18, 32);
+const cheekL = new THREE.Mesh(cheekGeom, matCheek); cheekL.position.set(-0.45,0.65,0.6); cheekL.rotation.x = -0.2; cheekL.visible=false; cat.add(cheekL);
+const cheekR = new THREE.Mesh(cheekGeom, matCheek); cheekR.position.set(0.45,0.65,0.6); cheekR.rotation.x = -0.2; cheekR.visible=false; cat.add(cheekR);
+
+const mouthGeom = new THREE.TorusGeometry(0.18, 0.06, 16, 64, Math.PI);
+const mouth = new THREE.Mesh(mouthGeom, matDark);
+mouth.rotation.z = Math.PI;
+mouth.position.set(0,0.55,0.65);
+mouth.scale.set(0.001,0.001,0.001);
+cat.add(mouth);
+
+const armR = new THREE.Group();
+const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.12,0.9,24), matBody);
+upperArm.position.set(0, -0.25, 0);
+upperArm.rotation.z = -0.5;
+armR.add(upperArm);
+const paw = new THREE.Mesh(new THREE.SphereGeometry(0.14,32,32), matBody);
+paw.position.set(-0.5, -0.6, 0);
+armR.add(paw);
+armR.position.set(0.55,0.2,0);
+armR.rotation.z = 0.1;
+cat.add(armR);
+
+const armL = new THREE.Group();
+const upperArmL = new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.12,0.9,24), matBody);
+upperArmL.position.set(0, -0.25, 0);
+upperArmL.rotation.z = 0.5;
+armL.add(upperArmL);
+const pawL = new THREE.Mesh(new THREE.SphereGeometry(0.14,32,32), matBody);
+pawL.position.set(0.5, -0.6, 0);
+armL.add(pawL);
+armL.position.set(-0.55,0.2,0);
+armL.rotation.z = 0.1;
+cat.add(armL);
+
+const tailGeom = new THREE.CylinderGeometry(0.08,0.08,1.0,16);
+const tail = new THREE.Mesh(tailGeom, matBody);
+tail.position.set(-1.0, -0.1, -0.1);
+tail.rotation.z = 0.6;
+cat.add(tail);
+
+const flower = new THREE.Group();
+const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,1.2,12), matStem);
+stem.position.set(0, -0.25, 0);
+flower.add(stem);
+for(let i=0;i<10;i++){
+  const pet = new THREE.Mesh(new THREE.SphereGeometry(0.12,16,16), matPetal);
+  const ang = (i/10)*Math.PI*2;
+  pet.position.set(Math.cos(ang)*0.28, -0.25 + Math.sin(ang)*0.12, 0.12);
+  pet.scale.set(1.5,1.0,0.6);
+  flower.add(pet);
+}
+const center = new THREE.Mesh(new THREE.SphereGeometry(0.18,16,16), matCenter);
+center.position.set(0, -0.25, 0.25);
+flower.add(center);
+flower.scale.set(0.001,0.001,0.001);
+flower.position.copy(paw.position).add(new THREE.Vector3(0.02, -0.05, 0.08));
+armR.add(flower);
+
+cat.position.y = -0.4;
+cat.rotation.y = 0.05;
+
+renderer.shadowMap.enabled = true;
+dir.castShadow = true;
+body.castShadow = true;
+
+let clock = new THREE.Clock();
+
+function playSurprise(){
+  const tl = gsap.timeline();
+  tl.to(armR.rotation, { z: -1.2, duration: 0.9, ease:"power2.out" }, 0);
+  tl.to(armR.position, { x: 0.9, y: 0.05, z: 0, duration: 0.9, ease:"power2.out" }, 0);
+  tl.to(flower.scale, { x:1.6, y:1.6, z:1.6, duration:0.9, ease:"back.out(1.4)" }, 0.4);
+  tl.to(flower.position, { x: 0.12, y: -0.45, z: 0.35, duration:0.9, ease:"power2.out" }, 0.4);
+  tl.to([leftEye.sprite.scale, rightEye.sprite.scale], { x:0.001, y:0.001, duration:0.25 }, 1.1);
+  tl.to(mouth.scale, { x:1, y:1, z:1, duration:0.35, ease:"elastic.out(1,0.6)" }, 1.2);
+  tl.to([cheekL.scale, cheekR.scale], { x:1, y:1, duration:0.35, onStart:()=>{cheekL.visible=true; cheekR.visible=true;} }, 1.2);
+  tl.to({}, {duration:0.6, onComplete:()=>{ drawHeartEyes(false); } }, 1.9);
+  tl.to(cat.rotation, { y: -0.08, duration:0.3, yoyo:true, repeat:1 }, 2.1);
+}
+
+function drawHeartEyes(useHeart=true){
+  [leftEye, rightEye].forEach(obj => {
+    const ctx = obj.ctx;
+    const size = obj.canvas.width;
+    ctx.clearRect(0,0,size,size);
+    if(useHeart){
+      ctx.fillStyle = '#ff3366';
+      ctx.font = '96px serif';
+      ctx.textAlign = 'center'; ctx.textBaseline='middle';
+      ctx.fillText('❤', size/2, size/2+8);
+    } else {
+      ctx.strokeStyle = '#222';
+      ctx.lineWidth = 8;
+      ctx.beginPath();
+      ctx.moveTo(size*0.25, size*0.55);
+      ctx.quadraticCurveTo(size*0.5, size*0.72, size*0.75, size*0.55);
+      ctx.stroke();
+    }
+    obj.tex.needsUpdate = true;
+    obj.sprite.scale.set(useHeart?0.4:0.5, useHeart?0.4:0.25,1);
+  });
+}
+
+drawHeartEyes(true);
+
+function animate(){
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+  tail.rotation.z = 0.6 + Math.sin(t*3)*0.18;
+  const s = 1 + Math.sin(t*1.8)*0.01;
+  body.scale.set(s, s*1.05, s*0.85);
+  renderer.render(scene, camera);
+}
+animate();
+
+const egg = document.getElementById('egg');
+const message = document.getElementById('message');
+const music = new Audio('canciones.mp3');
+music.loop = true;
+
+egg.addEventListener('click', async () => {
+  egg.style.display = 'none';
+  message.style.display = 'block';
+  try{ await music.play(); }catch(e){ console.warn('Autoplay bloqueado hasta interacción adicional.'); }
+  playSurprise();
+});
+
+window.addEventListener('resize', ()=>{
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>
